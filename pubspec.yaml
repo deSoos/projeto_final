@@ -1,0 +1,41 @@
+name: projeto_final
+description: Breathin' - Guided breathing app for anxiety and panic attacks.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # Sensors
+  sensors_plus: ^6.1.1         # Gyroscope + accelerometer
+
+  # Storage
+  shared_preferences: ^2.2.3    # Persist settings
+
+  # Utils
+  intl: ^0.20.2                 # Date formatting for logs
+
+  vibration: ^3.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/gifs/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#FFFFFF"
