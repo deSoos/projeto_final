@@ -91,7 +91,7 @@ class _CountdownScreenState extends State<CountdownScreen>
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: Text(
-                  _ready ? modeText : 'Getting ready...',
+                  modeText,
                   key: ValueKey(_ready),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
