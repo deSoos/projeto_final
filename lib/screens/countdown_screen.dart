@@ -18,7 +18,7 @@ class _CountdownScreenState extends State<CountdownScreen>
   final _logger = InteractionLogger();
 
   int _count = 3;
-  final FeedbackMode _feedbackMode = FeedbackMode.visual;
+  final FeedbackMode _feedbackMode = FeedbackMode.haptic;
   final bool _ready = false;
 
   late AnimationController _scaleController;
@@ -78,6 +78,8 @@ class _CountdownScreenState extends State<CountdownScreen>
 
   @override
   Widget build(BuildContext context) {
+    const modeText = 'Place your phone against\nyour chest.';
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -86,8 +88,17 @@ class _CountdownScreenState extends State<CountdownScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const AnimatedSwitcher(
-                duration: Duration(milliseconds: 400),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Text(
+                  _ready ? modeText : 'Getting ready...',
+                  key: ValueKey(_ready),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppTheme.onSurface,
+                        height: 1.5,
+                      ),
+                ),
               ),
 
               const SizedBox(height: 48),
