@@ -18,8 +18,8 @@ class _CountdownScreenState extends State<CountdownScreen>
   final _logger = InteractionLogger();
 
   int _count = 3;
-  FeedbackMode _feedbackMode = FeedbackMode.visual;
-  bool _ready = false;
+  final FeedbackMode _feedbackMode = FeedbackMode.visual;
+  final bool _ready = false;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -38,7 +38,7 @@ class _CountdownScreenState extends State<CountdownScreen>
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOut),
     );
 
-    _loadModeAndStart();
+    _startCountdown();
   }
 
   @override
@@ -47,17 +47,6 @@ class _CountdownScreenState extends State<CountdownScreen>
     _countdownTimer?.cancel();
     _scaleController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadModeAndStart() async {
-    if (mounted) {
-      setState(() {
-        _feedbackMode =
-            FeedbackMode.haptic;
-        _ready = true;
-      });
-    }
-    _startCountdown();
   }
 
   void _startCountdown() {
@@ -89,29 +78,16 @@ class _CountdownScreenState extends State<CountdownScreen>
 
   @override
   Widget build(BuildContext context) {
-    final modeText = _feedbackMode == FeedbackMode.haptic
-        ? 'Haptic mode active.\nPlace your phone against your chest.'
-        : 'Place your phone against\nyour chest.';
-
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Text(
-                  _ready ? modeText : 'Getting ready...',
-                  key: ValueKey(_ready),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.onSurface,
-                        height: 1.5,
-                      ),
-                ),
+              const AnimatedSwitcher(
+                duration: Duration(milliseconds: 400),
               ),
 
               const SizedBox(height: 48),
