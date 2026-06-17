@@ -152,25 +152,6 @@ class FeedbackManager {
     }
   }
 
-  Future<void> _triggerHaptic(BreathPhase phase) async {
-    
-    switch (phase) {
-      case BreathPhase.inhale:
-        HapticService.vibrate(duration: _inhaleMs);
-        _logger.onHapticsTriggered('inhale');
-        break;
-      case BreathPhase.hold:
-        // long sustained pulse to indicate the hold phase - 1s
-        HapticService.vibrate(duration: 1000);
-        _logger.onHapticsTriggered('hold');
-        break;
-      case BreathPhase.exhale:
-        HapticService.vibrate(duration: _exhaleMs);
-        _logger.onHapticsTriggered('exhale');
-        break;
-    }
-  }
-
   Future<void> _triggerWarning(String patternKey, String logLabel) async {
     
     final p = _parseWarningPattern(patternKey);
