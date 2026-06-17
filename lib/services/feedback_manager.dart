@@ -66,8 +66,8 @@ class FeedbackManager {
   bool _running = false;
 
   // single-pulse durations (ms) for inhale / exhale
-  int _inhaleMs = 250;  // default: Long
-  int _exhaleMs = 120;  // default: Medium
+  // default: Long
+  // default: Medium
 
   // multi-pulse pattern keys for warnings
   String _slowPatternKey     = '3 Short';
@@ -80,8 +80,6 @@ class FeedbackManager {
 
   Future<void> _loadPatterns() async {
     final prefs = await SharedPreferences.getInstance();
-    _inhaleMs           = _pulseMs(prefs.getString('inhalePattern')    ?? 'Long');
-    _exhaleMs           = _pulseMs(prefs.getString('exhalePattern')    ?? 'Medium');
     _slowPatternKey     = prefs.getString('slowPattern')               ?? '3 Short';
     _deepPatternKey     = prefs.getString('deepPattern')               ?? '3 Medium';
     _stabilizePatternKey = prefs.getString('stabilizePattern')         ?? '2 Short';
