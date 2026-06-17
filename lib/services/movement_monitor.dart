@@ -15,8 +15,8 @@ class MovementMonitor {
   // tremor: rapid small oscillations - detected via rolling variance.
   // chest breathing produces slow variance; hand tremor is much faster.
   // threshold set high enough to ignore normal breathing movement on chest.
-  static const double tremorVarianceThreshold = 0.9; // (m/s²)²
-  static const int _tremorWindowSize = 30; // ~600ms at typical 50Hz
+  static const double tremorVarianceThreshold = 0.1; // (m/s²)²
+  static const int _tremorWindowSize = 50; // ~600ms at typical 50Hz
   static const Duration _settleWindow = Duration(seconds: 2);
   static const Duration _calibrationDuration = Duration(milliseconds: 1200);
 

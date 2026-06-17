@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'package:projeto_final/models/session_data.dart';
+
 import "../services/haptic_service.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/session_data.dart';
 import '../utils/interaction_logger.dart';
 
 enum BreathPhase { inhale, hold, exhale }
@@ -49,7 +50,6 @@ class FeedbackManager {
   static const int holdSeconds   = 7;
   static const int exhaleSeconds = 8;
 
-  final FeedbackMode mode;
   final InteractionLogger _logger = InteractionLogger();
 
   final StreamController<BreathPhase> _phaseController = StreamController.broadcast();
@@ -74,7 +74,7 @@ class FeedbackManager {
   String _deepPatternKey     = '2 Medium';
   String _stabilizePatternKey = '2 Short';
 
-  FeedbackManager({required this.mode}) {
+  FeedbackManager({required FeedbackMode mode}) {
     _loadPatterns();
   }
 
@@ -114,7 +114,6 @@ class FeedbackManager {
     _phaseController.add(phase);
 
     final duration = _phaseDuration(phase);
-    if (mode == FeedbackMode.haptic) _triggerHaptic(phase);
 
     final start = DateTime.now();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (t) {

@@ -6,18 +6,10 @@ class SessionData {
   int breathingCycles = 0;
   int totalInhales = 0;
   int totalExhales = 0;
+  int tooFastWarnings = 0;
+  int tremorWarnings = 0;
 
-  /// Feedback mode active during the session.
-  FeedbackMode feedbackMode;
-
-  /// Noise level detected at session start (dB).
-  double initialNoiseDb;
-
-  SessionData({
-    required this.startTime,
-    required this.feedbackMode,
-    this.initialNoiseDb = 0.0,
-  });
+  SessionData({required this.startTime});
 
   Duration get duration {
     final end = endTime ?? DateTime.now();
@@ -38,8 +30,8 @@ class SessionData {
         'breathingCycles': breathingCycles,
         'totalInhales': totalInhales,
         'totalExhales': totalExhales,
-        'feedbackMode': feedbackMode.name,
-        'initialNoiseDb': initialNoiseDb,
+        'tooFastWarnings': tooFastWarnings,
+        'tremorWarnings': tremorWarnings,
       };
 }
 

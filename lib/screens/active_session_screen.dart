@@ -11,14 +11,7 @@ import '../utils/interaction_logger.dart';
 import 'stats_screen.dart';
 
 class ActiveSessionScreen extends StatefulWidget {
-  final FeedbackMode feedbackMode;
-  final double initialNoiseDb;
-
-  const ActiveSessionScreen({
-    super.key,
-    required this.feedbackMode,
-    required this.initialNoiseDb,
-  });
+  const ActiveSessionScreen({super.key, required double initialNoiseDb});
 
   @override
   State<ActiveSessionScreen> createState() => _ActiveSessionScreenState();
@@ -51,13 +44,10 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
   static const double _minCircleSize = 160.0;
   static const double _maxCircleSize = 260.0;
 
-  // whether tremor haptic feedback is enabled
   bool _tremorFeedbackEnabled = true;
 
-  // track the guided phase timestamps
   DateTime _lastDetectedInhale = DateTime.fromMillisecondsSinceEpoch(0);
 
-  // if two detected inhales happen faster than this, the user is breathing too fast.
   // guided inhale repeats every 19s (4+7+8) - warn if user inhales again within 12s.
   static const int _tooFastThresholdSeconds = 12;
 
@@ -66,11 +56,10 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
     super.initState();
     _logger.onScreenEnter('active_session');
 
-    _session = SessionData(
-      startTime: DateTime.now(),
-      feedbackMode: widget.feedbackMode,
-      initialNoiseDb: widget.initialNoiseDb,
-    );
+    _session = SessionData(startTime: DateTime.now());
+
+    // initialize first so StreamBuilder in build() never sees it uninitialized
+    _feedbackManager = FeedbackManager(mode: FeedbackMode.haptic);
 
     _holdPulseController = AnimationController(
       vsync: this,
@@ -88,11 +77,9 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
       CurvedAnimation(parent: _circleController, curve: Curves.easeInOut),
     );
 
-    _feedbackManager = FeedbackManager(mode: widget.feedbackMode);
     _breathingDetector = BreathingDetector();
     _movementMonitor = MovementMonitor();
 
-    // tremor feedback preference
     SharedPreferences.getInstance().then((prefs) {
       _tremorFeedbackEnabled = prefs.getBool('tremor_feedback') ?? true;
     });
@@ -106,6 +93,7 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
           timeSinceLastDetected < _tooFastThresholdSeconds) {
         _feedbackManager.triggerTooFastWarning();
         _logger.onTooFastWarning();
+        _session.tooFastWarnings++;
         _showWarning('breathe_slower');
       }
       _lastDetectedInhale = now;
@@ -122,6 +110,7 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
       if (!_tremorFeedbackEnabled) return;
       _feedbackManager.triggerStabilizeWarning();
       _logger.onTremorWarning();
+      _session.tremorWarnings++;
       _showWarning('stabilize_hand');
     };
     _movementMonitor.onStillDetected = () {
@@ -241,8 +230,8 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                   builder: (_, __) => Text(
                     '${s('cycle')} ${_feedbackManager.completedCycles + 1}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                   ),
                 ),
               ),

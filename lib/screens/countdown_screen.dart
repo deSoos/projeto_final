@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../l10n.dart';
-import '../models/session_data.dart';
 import '../theme/app_theme.dart';
 import '../utils/interaction_logger.dart';
 import 'active_session_screen.dart';
@@ -19,7 +18,6 @@ class _CountdownScreenState extends State<CountdownScreen>
   final _logger = InteractionLogger();
 
   int _count = 3;
-  final FeedbackMode _feedbackMode = FeedbackMode.haptic;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -65,11 +63,10 @@ class _CountdownScreenState extends State<CountdownScreen>
 
   void _navigateToSession() {
     if (!mounted) return;
-    _logger.onSessionStart(_feedbackMode, 0.0);
+    _logger.onSessionStart(0.0);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => ActiveSessionScreen(
-          feedbackMode: _feedbackMode,
+        builder: (_) => const ActiveSessionScreen(
           initialNoiseDb: 0.0,
         ),
       ),
