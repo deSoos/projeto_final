@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n.dart';
 import '../theme/app_theme.dart';
 import '../utils/interaction_logger.dart';
 import 'countdown_screen.dart';
@@ -22,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _logger.onScreenEnter('home');
 
-    // idle pulse on the main circle
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -54,6 +54,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    String s(String key) => L10n.of(context, key);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -67,18 +69,17 @@ class _HomeScreenState extends State<HomeScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Breathin'",
+                    s('app_name'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.onBackground,
                           fontWeight: FontWeight.w700,
                         ),
                   ),
                   IconButton(
                     onPressed: _openSettings,
                     icon: const Icon(Icons.settings_outlined),
-                    color: AppTheme.onSurface,
+                    color: Theme.of(context).colorScheme.onSurface,
                     iconSize: 26,
-                    tooltip: 'Settings',
+                    tooltip: s('settings'),
                   ),
                 ],
               ),
@@ -114,30 +115,17 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'START',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 2.5,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'SESSION',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 2.5,
-                                    ),
-                                  ),
-                                ],
+                            child: Center(
+                              child: Text(
+                                s('start_session'),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 2.5,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ),
@@ -145,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       const SizedBox(height: 32),
                       Text(
-                        'Tap to begin a guided\nbreathing session',
+                        s('tap_to_begin'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),

@@ -101,7 +101,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setString('deepPattern',      _deepPattern);
     await prefs.setString('stabilizePattern', _stabilizePattern);
 
-    // theme and language
     final modeMap = {
       'light':  ThemeMode.light,
       'dark':   ThemeMode.dark,
@@ -164,6 +163,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     String s(String key) => L10n.of(context, key);
+    String optLabel(String opt) =>
+        s('opt_${opt.toLowerCase().replaceAll(' ', '_')}');
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -219,20 +220,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     // breath cues
                     const Divider(height: 1),
                     _SectionHeader(s('breath_cues'), context),
-                    _PatternRow(label: s('inhale'), current: _inhalePattern, options: _pulseOptions,
-                        onChanged: (v) => setState(() => _inhalePattern = v!)),
-                    _PatternRow(label: s('exhale'), current: _exhalePattern, options: _pulseOptions,
-                        onChanged: (v) => setState(() => _exhalePattern = v!)),
+                    _PatternRow(
+                      label: s('inhale'),
+                      current: _inhalePattern,
+                      options: _pulseOptions,
+                      onChanged: (v) => setState(() => _inhalePattern = v!),
+                      optionLabel: optLabel,
+                    ),
+                    _PatternRow(
+                      label: s('exhale'),
+                      current: _exhalePattern,
+                      options: _pulseOptions,
+                      onChanged: (v) => setState(() => _exhalePattern = v!),
+                      optionLabel: optLabel,
+                    ),
 
                     // warnings
                     const Divider(height: 1),
                     _SectionHeader(s('warning_patterns'), context),
-                    _PatternRow(label: s('breathe_slower'), current: _slowPattern, options: _warningTripleOptions,
-                        onChanged: (v) => setState(() => _slowPattern = v!)),
-                    _PatternRow(label: s('breathe_deeper'), current: _deepPattern, options: _warningTripleOptions,
-                        onChanged: (v) => setState(() => _deepPattern = v!)),
-                    _PatternRow(label: s('stabilize_hand'), current: _stabilizePattern, options: _warningDoubleOptions,
-                        onChanged: (v) => setState(() => _stabilizePattern = v!)),
+                    _PatternRow(
+                      label: s('breathe_slower'),
+                      current: _slowPattern,
+                      options: _warningTripleOptions,
+                      onChanged: (v) => setState(() => _slowPattern = v!),
+                      optionLabel: optLabel,
+                    ),
+                    _PatternRow(
+                      label: s('breathe_deeper'),
+                      current: _deepPattern,
+                      options: _warningTripleOptions,
+                      onChanged: (v) => setState(() => _deepPattern = v!),
+                      optionLabel: optLabel,
+                    ),
+                    _PatternRow(
+                      label: s('stabilize_hand'),
+                      current: _stabilizePattern,
+                      options: _warningDoubleOptions,
+                      onChanged: (v) => setState(() => _stabilizePattern = v!),
+                      optionLabel: optLabel,
+                    ),
 
                     // dev tools
                     const SizedBox(height: 8),
@@ -352,7 +378,15 @@ class _PatternRow extends StatelessWidget {
   final String current;
   final List<String> options;
   final ValueChanged<String?> onChanged;
-  const _PatternRow({required this.label, required this.current, required this.options, required this.onChanged});
+  final String Function(String) optionLabel;
+
+  const _PatternRow({
+    required this.label,
+    required this.current,
+    required this.options,
+    required this.onChanged,
+    required this.optionLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -360,11 +394,23 @@ class _PatternRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.onSurface))),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+          ),
           const SizedBox(width: 12),
           DropdownButton<String>(
             value: current,
-            items: options.map((opt) => DropdownMenuItem(value: opt, child: Text(opt))).toList(),
+            items: options
+                .map((opt) => DropdownMenuItem(
+                      value: opt,
+                      child: Text(optionLabel(opt)),
+                    ))
+                .toList(),
             onChanged: onChanged,
             underline: const SizedBox(),
           ),

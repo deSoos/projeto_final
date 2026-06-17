@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n.dart';
 import '../models/session_data.dart';
 import '../services/breathing_detector.dart';
 import '../services/feedback_manager.dart';
@@ -96,19 +97,16 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
       _tremorFeedbackEnabled = prefs.getBool('tremor_feedback') ?? true;
     });
 
-    // breathing detector callbacks
-    // compare the detected inhale timing against the guided rhythm.
-    // if the user inhales significantly earlier than the guide expects, they're breathing too fast — fire the warning
     _breathingDetector.onInhaleDetected = () {
       final now = DateTime.now();
       final timeSinceLastDetected =
           now.difference(_lastDetectedInhale).inSeconds;
 
-      // only warn if we've seen at least one previous inhale (not first breath) and the gap between two real inhales is shorter than the threshold.
       if (_lastDetectedInhale != DateTime.fromMillisecondsSinceEpoch(0) &&
           timeSinceLastDetected < _tooFastThresholdSeconds) {
         _feedbackManager.triggerTooFastWarning();
-        _showWarning('Breathe slower');
+        _logger.onTooFastWarning();
+        _showWarning('breathe_slower');
       }
       _lastDetectedInhale = now;
     };
@@ -117,15 +115,14 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
       // missing: breathe deeper
     };
 
-    // movement monitor callbacks
-    // when the phone is picked up / moved away from the chest, pause warnings since the gyroscope readings are no longer valid chest-motion data.
     _movementMonitor.onMovementDetected = () {
-      _showWarning('Hold your phone still against your chest');
+      _showWarning('keep_still');
     };
     _movementMonitor.onTremorDetected = () {
       if (!_tremorFeedbackEnabled) return;
       _feedbackManager.triggerStabilizeWarning();
-      _showWarning('Try to steady your hand');
+      _logger.onTremorWarning();
+      _showWarning('stabilize_hand');
     };
     _movementMonitor.onStillDetected = () {
       _clearWarning();
@@ -168,11 +165,10 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
     // gyroscope-sync logic
   }
 
-  void _showWarning(String message) {
+  void _showWarning(String l10nKey) {
     if (!mounted) return;
     _warningTimer?.cancel();
-    setState(() => _warningMessage = message);
-    // auto-dismiss after 3 seconds
+    setState(() => _warningMessage = l10nKey);
     _warningTimer = Timer(const Duration(seconds: 3), _clearWarning);
   }
 
@@ -228,6 +224,8 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
 
   @override
   Widget build(BuildContext context) {
+    String s(String key) => L10n.of(context, key);
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -236,47 +234,17 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
           child: Column(
             children: [
               // top status bar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          widget.feedbackMode == FeedbackMode.haptic
-                              ? Icons.vibration
-                              : Icons.visibility_outlined,
-                          size: 14,
-                          color: AppTheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.feedbackMode == FeedbackMode.haptic
-                              ? 'Haptic'
-                              : 'Visual',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: StreamBuilder<BreathPhase>(
+                  stream: _feedbackManager.phaseStream,
+                  builder: (_, __) => Text(
+                    '${s('cycle')} ${_feedbackManager.completedCycles + 1}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  StreamBuilder<BreathPhase>(
-                    stream: _feedbackManager.phaseStream,
-                    builder: (_, __) => Text(
-                      'Cycle ${_feedbackManager.completedCycles + 1}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
+                ),
               ),
 
               // warning banner
@@ -301,7 +269,7 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _warningMessage!,
+                                s(_warningMessage!),
                                 style: const TextStyle(
                                   color: Colors.orange,
                                   fontSize: 13,
@@ -315,7 +283,7 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                     : const SizedBox(key: ValueKey('empty'), height: 0),
               ),
 
-              // animated breathing cycle
+              // animated breathing circle
               Expanded(
                 child: Center(
                   child: Column(
@@ -344,11 +312,11 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                                   ),
                                 ],
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: Text(
-                                  'KEEP\nBREATHING',
+                                  s('keep_breathing'),
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w700,
@@ -365,7 +333,7 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: Text(
-                          _phase.instruction,
+                          s(_phase.instructionKey),
                           key: ValueKey(_phase),
                           textAlign: TextAlign.center,
                           style:
@@ -394,9 +362,9 @@ class _ActiveSessionScreenState extends State<ActiveSessionScreen>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'END SESSION',
-                        style: TextStyle(
+                      child: Text(
+                        s('end_session'),
+                        style: const TextStyle(
                           letterSpacing: 1.5,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,

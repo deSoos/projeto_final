@@ -7,18 +7,18 @@ import '../utils/interaction_logger.dart';
 enum BreathPhase { inhale, hold, exhale }
 
 extension BreathPhaseLabel on BreathPhase {
-  String get label {
+  String get labelKey {
     switch (this) {
-      case BreathPhase.inhale: return 'INHALE';
-      case BreathPhase.hold:   return 'HOLD';
-      case BreathPhase.exhale: return 'EXHALE';
+      case BreathPhase.inhale: return 'inhale_label';
+      case BreathPhase.hold:   return 'hold_label';
+      case BreathPhase.exhale: return 'exhale_label';
     }
   }
-  String get instruction {
+  String get instructionKey {
     switch (this) {
-      case BreathPhase.inhale: return 'Breathe in slowly...';
-      case BreathPhase.hold:   return 'Hold your breath...';
-      case BreathPhase.exhale: return 'Breathe out slowly...';
+      case BreathPhase.inhale: return 'breathe_in';
+      case BreathPhase.hold:   return 'hold_breath';
+      case BreathPhase.exhale: return 'breathe_out';
     }
   }
 }

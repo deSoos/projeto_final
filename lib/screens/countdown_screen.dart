@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../l10n.dart';
 import '../models/session_data.dart';
 import '../theme/app_theme.dart';
 import '../utils/interaction_logger.dart';
@@ -19,7 +20,6 @@ class _CountdownScreenState extends State<CountdownScreen>
 
   int _count = 3;
   final FeedbackMode _feedbackMode = FeedbackMode.haptic;
-  final bool _ready = false;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -78,117 +78,68 @@ class _CountdownScreenState extends State<CountdownScreen>
 
   @override
   Widget build(BuildContext context) {
-    const modeText = 'Place your phone against\nyour chest.';
+    String s(String key) => L10n.of(context, key);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Text(
-                  modeText,
-                  key: ValueKey(_ready),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  s('place_chest'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.onSurface,
                         height: 1.5,
                       ),
                 ),
-              ),
 
-              const SizedBox(height: 48),
+                const SizedBox(height: 48),
 
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) => Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: child,
-                ),
-                child: Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.primary,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 36,
-                        spreadRadius: 6,
-                      ),
-                    ],
+                AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) => Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: child,
                   ),
-                  child: Center(
-                    child: Text(
-                      '$_count',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 72,
-                        fontWeight: FontWeight.w800,
+                  child: Container(
+                    width: 180,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.3),
+                          blurRadius: 36,
+                          spreadRadius: 6,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 72,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 48),
+                const SizedBox(height: 48),
 
-              if (_ready)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _feedbackMode == FeedbackMode.haptic
-                            ? Icons.vibration
-                            : Icons.visibility_outlined,
-                        color: AppTheme.primary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _feedbackMode == FeedbackMode.haptic
-                            ? 'Haptic mode'
-                            : 'Visual mode',
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-
-              const Spacer(),
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppTheme.subtle.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

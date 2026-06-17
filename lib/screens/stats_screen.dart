@@ -152,7 +152,7 @@ class _GifOrEmoji extends StatelessWidget {
       gifPath,
       height: 120,
       errorBuilder: (_, __, ___) =>
-          const Text('🌿', style: TextStyle(fontSize: 64)),
+          const Text('', style: TextStyle(fontSize: 64)),
     );
   }
 }

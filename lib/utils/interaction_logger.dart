@@ -16,6 +16,9 @@ class InteractionLogger {
   DateTime? _screenStartTime;
   String? _currentScreen;
 
+  int _tooFastWarningCount = 0;
+  int _tremorWarningCount = 0;
+
   // screen timing
 
   void onScreenEnter(String screenName) {
@@ -34,6 +37,8 @@ class InteractionLogger {
   // action events
 
   void onSessionStart(FeedbackMode mode, double noiseDb) {
+    _tooFastWarningCount = 0;
+    _tremorWarningCount = 0;
     _log('session_start', {
       'feedback_mode': mode.name,
       'noise_db': noiseDb.toStringAsFixed(1),
@@ -45,6 +50,8 @@ class InteractionLogger {
       'duration_s': data.duration.inSeconds,
       'cycles': data.breathingCycles,
       'feedback_mode': data.feedbackMode.name,
+      'too_fast_warnings': _tooFastWarningCount,
+      'tremor_warnings': _tremorWarningCount,
     });
   }
 
@@ -58,6 +65,16 @@ class InteractionLogger {
 
   void onHapticsTriggered(String reason) {
     _log('haptic', {'reason': reason});
+  }
+
+  void onTooFastWarning() {
+    _tooFastWarningCount++;
+    _log('warning', {'type': 'too_fast', 'count': _tooFastWarningCount});
+  }
+
+  void onTremorWarning() {
+    _tremorWarningCount++;
+    _log('warning', {'type': 'tremor', 'count': _tremorWarningCount});
   }
 
   // persistence
@@ -103,22 +120,31 @@ class InteractionLogger {
   Future<String> exportSummary() async {
     final sessions = await getSessions();
     if (sessions.isEmpty) return 'No sessions recorded.';
-
+  
     final durations = sessions
         .map((s) => (s['durationSeconds'] as num).toInt())
         .toList();
     final cycles =
         sessions.map((s) => (s['breathingCycles'] as num).toInt()).toList();
-
+    final tooFastCounts = sessions
+        .map((s) => (s['too_fast_warnings'] as num? ?? 0).toInt())
+        .toList();
+    final tremorCounts = sessions
+        .map((s) => (s['tremor_warnings'] as num? ?? 0).toInt())
+        .toList();
+  
     final avgDuration = durations.reduce((a, b) => a + b) / durations.length;
     final avgCycles = cycles.reduce((a, b) => a + b) / cycles.length;
-
+    final avgTooFast = tooFastCounts.reduce((a, b) => a + b) / tooFastCounts.length;
+    final avgTremor = tremorCounts.reduce((a, b) => a + b) / tremorCounts.length;
+  
     final buf = StringBuffer();
     buf.writeln('=== Breathin\' Interaction Log Summary ===');
-    buf.writeln('Total sessions   : ${sessions.length}');
-    buf.writeln(
-        'Avg duration     : ${avgDuration.toStringAsFixed(0)} s');
-    buf.writeln('Avg cycles       : ${avgCycles.toStringAsFixed(1)}');
+    buf.writeln('Total sessions      : ${sessions.length}');
+    buf.writeln('Avg duration        : ${avgDuration.toStringAsFixed(0)} s');
+    buf.writeln('Avg cycles          : ${avgCycles.toStringAsFixed(1)}');
+    buf.writeln('Avg too-fast warns  : ${avgTooFast.toStringAsFixed(1)}');
+    buf.writeln('Avg tremor warns    : ${avgTremor.toStringAsFixed(1)}');
     buf.writeln('');
     buf.writeln('Per-session detail:');
     for (var i = 0; i < sessions.length; i++) {
@@ -126,11 +152,11 @@ class InteractionLogger {
       buf.writeln(
           '  #${i + 1}  ${s['durationSeconds']}s  '
           '${s['breathingCycles']} cycles  '
-          '[${s['feedbackMode']}]  '
-          'noise=${s['initialNoiseDb']}dB');
+          '${tooFastCounts[i]} too-fast  '
+          '${tremorCounts[i]} tremor');
     }
     return buf.toString();
-  }
+}
 
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
